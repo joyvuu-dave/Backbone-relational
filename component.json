@@ -1,0 +1,7 @@
+{
+  "name": "backbone-relational",
+  "version": "0.8.1",
+  "main": "./backbone-relational.js",
+  "dependencies": {
+  }
+}
