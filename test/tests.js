@@ -1324,6 +1324,33 @@ $(document).ready(function() {
 			equal( changedAttrs.color, 'red', '... with correct properties in "changedAttributes"' );
 		});
 
+		test( 'change events should not fire on new items in Collection#set', function() {
+			var changeEvents = 0;
+			var Foo = Backbone.RelationalModel.extend({
+				initialize: function(options) {
+					this.on( 'change', function(name) { changeEvents++; } );
+					this.on( 'change:id', function(name) { changeEvents++; } );
+					this.on( 'change:name', function(name) { changeEvents++; } );
+					this.on( 'all', function(name) {
+						if ( name.indexOf('change') === 0 ) {
+							changeEvents++;
+						}
+					});
+				}
+			});
+			var Foos = Backbone.Collection.extend({
+				model: Foo
+			});
+
+			var foos = new Foos();
+			foos.set( [{
+				id: 'foo-1',
+				name: 'foo'
+			}] );
+
+			equal( changeEvents, 0, 'no change events should be triggered' );
+		});
+
 	
 	module( "Backbone.RelationalModel inheritance (`subModelTypes`)", { setup: reset } );
 
@@ -3521,6 +3548,22 @@ $(document).ready(function() {
 
 			equal( zoo.get( 'name' ), 'Zoo Station' );
 			equal( lion.get( 'name' ), 'Simba' );
+		});
+
+		test( "reset should use `merge: true` by default", function() {
+			var nodeList = new NodeList();
+
+			nodeList.add( [ { id: 1 }, { id: 2, parent: 1 } ] );
+
+			var node1 = nodeList.get( 1 ),
+				node2 = nodeList.get( 2 );
+
+			ok( node2.get( 'parent' ) === node1 );
+			ok( !node1.get( 'parent' ) );
+
+			nodeList.reset( [ { id: 1, parent: 2 } ] );
+
+			ok( node1.get( 'parent' ) === node2 );
 		});
 
 		test( "add/remove/update (with `add`, `remove` and `merge` options)", function() {
